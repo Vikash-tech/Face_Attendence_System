@@ -1,0 +1,224 @@
+
+
+{% extends "base.html" %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}
+
+{% block content %}
+<!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-4" style="margin-top: 10px;"> 
+         <h1 class="text-black mb-4">
+            <i class="fas fa-chart-line"></i> Dashboard
+        </h1>
+    </div>
+    <div class="col-6 col-md-2 mb-3">
+        <div class="stat-card">
+            <i class="fas fa-users"></i>
+            <h3>{{ employees|length }}</h3>
+            <p>Total Employees</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-2 mb-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #1cc88a 0%, #13855c 100%);">
+            <i class="fas fa-clock"></i>
+            <h3>{{ today_attendance_count }}</h3>
+            <p>Present Today</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-2 mb-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f6c23e 0%, #dda20a 100%);">
+            <i class="fas fa-hourglass-half"></i>
+            <h3>{{ working_now_count }}</h3>
+            <p>Working Now</p>
+        </div>
+    </div>
+    <div class="col-6 col-md-2 mb-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #e74a3b 0%, #c9211c 100%);">
+            <i class="fas fa-user-clock"></i>
+            <h3>{{ absent_count }}</h3>
+            <p>Absent Today</p>
+        </div>
+    </div>
+</div>
+
+<!-- Employee Table -->
+<div class="row">
+        <div class="card">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-list"></i> Employee List
+                </h5>
+                <div>
+                    <span class="badge-status badge-in me-1">
+                        <i class="fas fa-circle"></i> Working
+                    </span>
+                    <span class="badge-status badge-out me-1">
+                        <i class="fas fa-circle"></i> Left
+                    </span>
+                    <span class="badge-status" style="background: #f6c23e; color: white;">
+                        <i class="fas fa-circle"></i> Absent
+                    </span>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-hover" id="servicesTable">
+                        <thead class="table-light">
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Status</th>
+                                <th class="d-none d-sm-table-cell">Last Attendance</th>
+                                <th class="d-none d-sm-table-cell">Today Hours</th>
+                                <th class="d-none d-md-table-cell">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for emp in employees %}
+                            <tr>
+                                <td><span class="badge bg-secondary">{{ emp.emp_code }}</span>
+                                </td>
+                                <td>
+                                    <a href="/mark?emp_code={{ emp.emp_code }}">
+                                    <div class="d-flex align-items-center">
+
+                                        <i class="fas fa-user-circle">&nbsp;</i>
+                                        <div><strong>{{ emp.name }}</strong></div>
+                                    </div>
+                                    </a>
+                                </td>
+                                <td>
+                                    {% if emp.status == 'working' %}
+                                        <span class="badge-status badge-in">
+                                            <i class="fas fa-circle"></i> {{ emp.status_text }} 
+                                        </span>
+                                    {% elif emp.status == 'left' %}
+                                        <span class="badge-status badge-out">
+                                            <i class="fas fa-circle"></i> {{ emp.status_text }}
+                                        </span>
+                                    {% elif emp.status == 'absent' %}
+                                        <span class="badge-status" style="background: #f6c23e; color: white;">
+                                            <i class="fas fa-circle"></i> {{ emp.status_text }}
+                                        </span>
+                                    {% else %}
+                                        <span class="badge-status" style="background: #858796; color: white;">
+                                            <i class="fas fa-circle"></i> {{ emp.status_text }}
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="d-none d-sm-table-cell">
+                                    {% if emp.last_attendance_time %}
+                                        {{ emp.last_attendance_time }}
+                                    {% else %}
+                                        <span class="text-muted">Never</span>
+                                    {% endif %}
+                                </td>
+                                <td class="d-none d-sm-table-cell">
+                                    {% if emp.today_minutes > 0 %}
+                                        {% set hours = emp.today_minutes // 60 %}
+                                        {% set minutes = emp.today_minutes % 60 %}
+                                        {% set percentage = (emp.today_minutes / 480) * 100 %}
+                                        {% if percentage > 100 %}{% set percentage = 100 %}{% endif %}
+                                        <div class="d-flex align-items-center">
+                                            <div class="progress" style="width: 100px; height: 8px; margin-right: 10px;">
+                                                <div class="progress-bar bg-success" role="progressbar"
+                                                     style="width: {{ percentage }}%;"
+                                                     aria-valuenow="{{ percentage }}"
+                                                     aria-valuemin="0"
+                                                     aria-valuemax="100"></div>
+                                            </div>
+                                            <span class="fw-bold">{{ hours }}h {{ minutes }}m</span>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted">-</span>
+                                    {% endif %}
+                                </td>
+                                <td class="d-none d-md-table-cell">
+                                    <a href="{{ url_for('update_page', emp_code=emp.emp_code) }}">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center py-5">
+                                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                                    <h5 class="text-muted">No employees registered yet</h5>
+                                    <a href="/register" class="btn btn-primary mt-3">
+                                        <i class="fas fa-user-plus"></i> Register First Employee
+                                    </a>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                         <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+</div>
+
+<!-- Today's Summary Card -->
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">
+                    <i class="fas fa-chart-pie"></i> Today's Summary ({{ now().strftime('%B %d, %Y') }})
+                </h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="display-4 text-primary">{{ today_attendance_count }}</div>
+                            <p class="text-muted mb-0">Total Present</p>
+                            <small>{{ "%.1f"|format((today_attendance_count / employees|length * 100) if employees|length > 0 else 0) }}% attendance</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="display-4 text-success">{{ working_now_count }}</div>
+                            <p class="text-muted mb-0">Currently Working</p>
+                            <small>Active now</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="text-center">
+                            <div class="display-4 text-warning">{{ absent_count }}</div>
+                            <p class="text-muted mb-0">Absent Today</p>
+                            <small>No show</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3 mb-3">
+                        <div class="text-center">
+                            {% set total_hours = 0 %}
+                            {% for emp in employees %}
+                                {% set total_hours = total_hours + emp.today_minutes %}
+                            {% endfor %}
+                            <div class="display-4 text-info">{{ (total_hours // 60) }}h</div>
+                            <p class="text-muted mb-0">Total Work Hours</p>
+                            <small>{{ total_hours % 60 }} minutes</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+$(document).ready(function () {
+    $('#servicesTable').DataTable({
+        scrollY: "400px", 
+        pageLength: 20 ,     // height of scroll
+        paging: true    ,
+        responsive: false         // enable pagination
+    });
+});
+</script>
+
+{% endblock %}
