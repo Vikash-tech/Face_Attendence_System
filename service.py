@@ -170,7 +170,7 @@ def update_page(emp_code=None):
 #     return jsonify({"success": True})
 
 
-@app.route("/report")
+@app.route("/report")    
 def report():
     params = {
         "from_date": request.args.get("from_date"),
