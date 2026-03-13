@@ -1,0 +1,266 @@
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_detection/face_detection.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+
+<style>
+  .success-tick {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    width: 60px;
+    height: 60px;
+    background: #28a745;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    z-index: 10;
+    animation: pop 0.4s ease;
+}
+
+@keyframes pop {
+    0% { transform: scale(0.5); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+
+.face-guide.detected {
+    border-color: #28a745 !important;
+}
+</style>
+
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-white">
+                <h4 class="mb-0">
+                    <i class="fas fa-user-plus"></i> Employee Registration
+                </h4>
+            </div>
+            <div class="card-body">
+                {% if error %}
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-triangle"></i> {{ error }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+                {% endif %}
+
+                <form id="registerForm" method="POST">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="emp_code" class="form-label">
+                                    <i class="fas fa-id-card"></i> Employee ID
+                                </label>
+                                <input type="text" class="form-control" id="emp_code" name="emp_code" 
+                                       placeholder="Enter employee ID" required>
+                                <div class="invalid-feedback">
+                                    Please enter employee ID.
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="name" class="form-label">
+                                    <i class="fas fa-user"></i> Full Name
+                                </label>
+                                <input type="text" class="form-control" id="name" name="name" 
+                                       placeholder="Enter full name" required>
+                                <div class="invalid-feedback">
+                                    Please enter employee name.
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-md-6">
+                            <div class="camera-container">
+                                
+                                <div id="successTick" class="success-tick">
+                                    ✔
+                                </div>
+
+
+                                <video id="camera-feed" autoplay playsinline></video>
+                                <div class="camera-overlay"></div>
+                                <div class="face-guide"></div>
+                                <canvas id="photo-canvas" style="display: none;"></canvas>
+                            </div>
+                            
+                            <div id="cameraStatus" class="mt-2 text-center">
+                                <span class="badge bg-warning">
+                                    <i class="fas fa-spinner fa-spin"></i> Initializing camera...
+                                </span>
+                            </div>
+                            
+                            <div class="mt-3 text-center">
+                                <button type="button" id="captureBtn" class="btn btn-primary" disabled>
+                                    <i class="fas fa-camera"></i> Capture Face
+                                </button>
+                                <button type="button" id="retakeBtn" class="btn btn-secondary" style="display: none;">
+                                    <i class="fas fa-redo"></i> Retake
+                                </button>
+                            </div>
+                            
+                            <input type="hidden" id="photo_data" name="photo_data">
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <button type="submit" id="submitBtn" class="btn btn-success w-100" disabled>
+                            <i class="fas fa-save"></i> Register Employee
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+const video = document.getElementById('camera-feed');
+const canvas = document.getElementById('photo-canvas');
+const captureBtn = document.getElementById('captureBtn');
+const retakeBtn = document.getElementById('retakeBtn');
+const submitBtn = document.getElementById('submitBtn');
+const photoInput = document.getElementById('photo_data');
+const cameraStatus = document.getElementById('cameraStatus');
+
+const successTick = document.getElementById('successTick');
+
+let stream = null;
+
+// Initialize Camera
+async function initCamera() {
+    try {
+        stream = await navigator.mediaDevices.getUserMedia({
+            video: {
+                facingMode: "user"
+            },
+            audio: false
+        });
+
+        video.srcObject = stream;
+
+        video.onloadedmetadata = () => {
+            video.play();
+            captureBtn.disabled = false;
+            cameraStatus.innerHTML =
+                '<span class="badge bg-success"><i class="fas fa-check"></i> Camera ready</span>';
+        };
+
+    } catch (err) {
+        console.error('Camera error:', err);
+        cameraStatus.innerHTML =
+            '<span class="badge bg-danger"><i class="fas fa-exclamation"></i> Camera not available</span>';
+    }
+}
+
+function capturePhoto() {
+
+    const context = canvas.getContext('2d');
+
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
+    context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+    const photoData = canvas.toDataURL('image/jpeg', 0.9);
+    photoInput.value = photoData;
+
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+
+    video.style.display = 'none';
+    canvas.style.display = 'block';
+
+    captureBtn.style.display = 'none';
+    retakeBtn.style.display = 'inline-block';
+    submitBtn.disabled = false;
+
+    // ✅ SHOW SUCCESS TICK
+    successTick.style.display = 'flex';
+
+    cameraStatus.innerHTML =
+        '<span class="badge bg-success"><i class="fas fa-check"></i> Face captured successfully</span>';
+}
+
+
+// Retake Photo
+function retakePhoto() {
+
+    initCamera();
+
+    video.style.display = 'block';
+    canvas.style.display = 'none';
+
+    captureBtn.style.display = 'inline-block';
+    retakeBtn.style.display = 'none';
+    submitBtn.disabled = true;
+
+    photoInput.value = '';
+
+    // ✅ HIDE SUCCESS TICK
+    successTick.style.display = 'none';
+
+    cameraStatus.innerHTML =
+        '<span class="badge bg-warning"><i class="fas fa-camera"></i> Position your face in the circle</span>';
+}
+
+
+// Event Listeners
+captureBtn.addEventListener('click', capturePhoto);
+retakeBtn.addEventListener('click', retakePhoto);
+
+document.getElementById('registerForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+
+    if (!photoInput.value) {
+        alert('Please capture a photo first!');
+        return;
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Registering...';
+
+    const formData = new URLSearchParams();
+    formData.append('emp_code', document.getElementById('emp_code').value.trim());
+    formData.append('name', document.getElementById('name').value.trim());
+    formData.append('photo_data', photoInput.value);
+
+    fetch(apiUrl('/register'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString()
+    })
+    .then((res) => {
+        if (!res.ok) {
+            throw new Error('Registration failed');
+        }
+        showToast('Employee registered', 'success');
+        setTimeout(() => {
+            window.location.href = '/mark';
+        }, 700);
+    })
+    .catch(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = '<i class="fas fa-save"></i> Register Employee';
+        alert('Registration failed. Check API server and data.');
+    });
+});
+
+// Initialize camera on load
+initCamera();
+
+window.addEventListener('beforeunload', function () {
+    if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+    }
+});
+</script> 
+
+{% endblock %}
