@@ -96,81 +96,8 @@ def update_page(emp_code=None):
         api_error="",
     )
 
-# @app.route("/report-data")
-# def report_data():
 
-#     from_date = request.args.get("from_date")
-#     to_date = request.args.get("to_date")
-#     employee_id = request.args.get("employee_id")
-
-#     sql_query = """
-#         SELECT
-#             a.emp_id,
-#             e.name AS employee_name,
-#             DATE(a.timestamp) AS att_date,
-#             MIN(a.timestamp) AS in_time,
-#             MAX(a.timestamp) AS out_time,
-#             SUM(COALESCE(a.working_minutes,0)) AS working_minutes
-#         FROM attendance a
-#         JOIN employee e ON a.emp_id = e.id
-#         WHERE e.Active = 1
-#     """
-
-#     params = {}
-
-#     if from_date:
-#         sql_query += " AND DATE(a.timestamp) >= :from_date"
-#         params["from_date"] = from_date
-
-#     if to_date:
-#         sql_query += " AND DATE(a.timestamp) <= :to_date"
-#         params["to_date"] = to_date
-
-#     if employee_id and employee_id.isdigit():
-#         sql_query += " AND a.emp_id = :emp_id"
-#         params["emp_id"] = int(employee_id)
-
-#     sql_query += """
-#         GROUP BY a.emp_id, DATE(a.timestamp)
-#         ORDER BY att_date
-#     """
-
-#     result = db.session.execute(text(sql_query), params)
-
-#     for row in result:
-
-#         user_id = row.emp_id
-#         user_name = row.employee_name
-#         att_date = row.att_date
-#         in_time = row.in_time
-#         out_time = row.out_time
-
-#         total_hours = round((row.working_minutes or 0) / 60, 2)
-
-#         db.session.execute(text("""
-#             CALL sp_insert_attendance_summary(
-#                 :user_id,
-#                 :user_name,
-#                 :att_date,
-#                 :in_time,
-#                 :out_time,
-#                 :total_hours
-#             )
-#         """), {
-#             "user_id": user_id,
-#             "user_name": user_name,
-#             "att_date": att_date,
-#             "in_time": in_time,
-#             "out_time": out_time,
-#             "total_hours": total_hours
-#         })
-
-#     db.session.commit()
-
-#     return jsonify({"success": True})
-
-
-@app.route("/report")    
+@app.route("/report")
 def report():
     params = {
         "from_date": request.args.get("from_date"),
