@@ -5,7 +5,6 @@
     --success-color: #1cc88a;
     --danger-color: #e74a3b;
     --warning-color: #f6c23e;
-<<<<<<< HEAD
     --warning-dark: #dda20a;
     --dark-bg: #1a1a2e;
     --card-bg: rgba(255, 255, 255, 0.98);
@@ -43,12 +42,6 @@
 body {
     /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
     background: linear-gradient(135deg, #667eea 0%, #fff 100%);
-=======
-}
-
-body {
-    background: #e3f2fd;
->>>>>>> c797a8adea6ee88c2d7952831167843805badc0a
     min-height: 100vh;
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }

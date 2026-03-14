@@ -96,7 +96,6 @@ def update_page(emp_code=None):
         api_error="",
     )
 
-<<<<<<< HEAD
 @app.route("/essl-report")
 def esslreport():
     params = {
@@ -139,10 +138,6 @@ def esslreport():
 
 
 @app.route("/report")    
-=======
-
-@app.route("/report")
->>>>>>> c797a8adea6ee88c2d7952831167843805badc0a
 def report():
     params = {
         "from_date": request.args.get("from_date"),
