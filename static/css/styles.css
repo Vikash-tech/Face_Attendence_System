@@ -252,7 +252,6 @@ table thead {
     to { transform: translateX(0); opacity: 1; }
 }
 
-<<<<<<< HEAD
 /* Responsive adjustments */
 @media (max-width: 768px) {
     body {
@@ -384,8 +383,3 @@ html {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--primary-dark);
 }
-=======
-.toast-success { border-left: 5px solid var(--success-color); }
-.toast-error   { border-left: 5px solid var(--danger-color); }
-.toast-warning { border-left: 5px solid var(--warning-color); }
->>>>>>> c797a8adea6ee88c2d7952831167843805badc0a
