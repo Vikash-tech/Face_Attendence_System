@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/report.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid">
+
+<h2 class="mb-4">
+<i class="fas fa-chart-bar"></i> ESSL Attendance Report
+</h2>
+
+<!-- FILTER CARD -->
+<div class="card mb-4">
+
+<div class="card-header bg-white d-flex justify-content-between">
+<strong>Filter Reports</strong>
+
+<button class="btn btn-success btn-sm" onclick="exportReport()">
+<i class="fa fa-file-excel"></i> Export
+</button>
+
+</div>
+
+<div class="card-body">
+
+<form method="GET" action="/report" class="row g-3">
+
+<div class="col-md-3">
+<label>From Date</label>
+<input type="date"
+class="form-control"
+name="from_date"
+id="from_date"
+value="{{ from_date or '' }}">
+</div>
+
+<div class="col-md-3">
+<label>To Date</label>
+<input type="date"
+class="form-control"
+name="to_date"
+id="to_date"
+value="{{ to_date or '' }}">
+</div>
+
+<div class="col-md-3">
+<label>Employee</label>
+
+<select class="form-control"
+name="employee_id"
+id="employee_id">
+
+<option value="">All Employees</option>
+
+{% for emp in employees %}
+<option value="{{ emp.id }}"
+{% if selected_employee == emp.id|string %}selected{% endif %}>
+{{ emp.emp_code }} - {{ emp.name }}
+</option>
+{% endfor %}
+
+</select>
+</div>
+
+<div class="col-md-3 d-flex align-items-end">
+
+<button class="btn btn-primary w-100">
+<i class="fa fa-search"></i> Apply Filters
+</button>
+
+</div>
+
+</form>
+
+</div>
+</div>
+
+<!-- TABLE CARD -->
+<div class="card">
+
+<div class="card-header bg-white">
+<strong>Attendance Summary</strong>
+</div>
+
+<div class="card-body">
+
+<div class="table-responsive">
+
+<table class="table table-bordered table-striped table-hover"
+id="esslattendanceTable">
+
+<thead class="table-light">
+
+<tr>
+
+<th>User ID</th>
+<th>User Name</th>
+<th>Date</th>
+<th>In Time</th>
+<th>Out Time</th>
+<th>Total Hours</th>
+<th>Present</th>
+<th>OT</th>
+
+</tr>
+
+</thead>
+
+<tbody>
+
+{% for record in data %}
+
+<tr>
+
+<td>{{ record.user_id }}</td>
+
+<td>{{ record.user_name }}</td>
+
+<td>
+{% if record.date %}
+{{ record.date.strftime('%Y-%m-%d') }}
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>
+{% if record.in_time %}
+{{ record.in_time.strftime('%H:%M:%S') }}
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>
+{% if record.out_time %}
+{{ record.out_time.strftime('%H:%M:%S') }}
+{% else %}
+-
+{% endif %}
+</td>
+
+<td>{{ record.total_hours }}</td>
+
+<td>{{ record.present }}</td>
+
+<td>{{ record.ot }}</td>
+
+</tr>
+
+{% endfor %}
+
+</tbody>
+
+</table>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+$(document).ready(function () {
+
+$('#esslattendanceTable').DataTable({
+
+scrollY: "400px",
+pageLength: 20,
+paging: true,
+responsive: true,
+info: true,
+order: [[2, "desc"]]
+
+});
+
+});
+
+function exportReport(){
+
+const from_date = document.getElementById("from_date").value;
+const to_date = document.getElementById("to_date").value;
+const employee_id = document.getElementById("employee_id").value;
+
+window.location.href =
+apiUrl(`/api/essl-export-report?from_date=${from_date}&to_date=${to_date}&employee_id=${employee_id}`);
+
+}
+
+</script>
+
+{% endblock %}

@@ -23,7 +23,7 @@
     }
     
     body {
-        background: #0f3460;
+          background: #0f3460;
     }
     
     .card {
@@ -42,7 +42,8 @@
 }
 
 body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    /* background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); */
+    background: linear-gradient(135deg, #667eea 0%, #fff 100%);
     min-height: 100vh;
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     padding-top: 70px;
@@ -523,15 +524,15 @@ body {
     }
     
     .camera-container {
-        min-height: 250px;
+        min-height: 300px;
     }
     
     .stat-card {
-        padding: 15px;
+        padding: 8px;
     }
     
     .stat-card i {
-        font-size: 2rem;
+        font-size: 1.5rem;
     }
     
     .stat-card h3 {
@@ -549,15 +550,40 @@ body {
     }
     
     .face-guide {
-        width: 150px;
-        height: 150px;
+        width: 250px;
+        height: 250px;
     }
+
+    .stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 10px;
+    border-radius: 20px;
+    margin-bottom: 0px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+ .dashboard-title {
+        display: none;
+    }
+
+    .employee-title{
+    font-size: 1rem;   /* similar to h6 */
+    font-weight: 600;
+}
+
 }
 
 @media (max-width: 480px) {
     .face-guide {
-        width: 120px;
-        height: 120px;
+        width: 250px;
+        height: 250px;
     }
     
     .badge-status {

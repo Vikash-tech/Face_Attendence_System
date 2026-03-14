@@ -2,6 +2,7 @@
 
 {% block content %}
 
+
 <div class="row justify-content-center">
 <div class="col-md-8">
 
@@ -22,7 +23,7 @@
 
 <div class="mb-3">
 
-<label for="emp_code" class="form-label">
+<label class="form-label">
 <i class="fas fa-id-card"></i> Employee ID
 </label>
 
@@ -34,59 +35,75 @@ id="emp_code"
 placeholder="Enter employee ID"
 value="{{ emp_code if emp_code else '' }}">
 
-<span class="input-group-text btn btn-primary " id="captureBtn" style="cursor:pointer">
+<button class="btn btn-primary" id="captureBtn">
 <i class="fas fa-camera"></i>
-</span>
-
-</div>
-
-</div>
-
-<div class="mt-3 text-center">
-
-<button id="updateBtn" class="btn btn-success" disabled>
-<i class="fas fa-upload"></i> Update
 </button>
 
 </div>
 
+</div>
+
+
+<div class="mt-3 text-center">
+
+<button id="updateBtn"
+class="btn btn-success"
+disabled>
+
+<i class="fas fa-upload"></i> Update
+
+</button>
+
+</div>
+
+
 <!-- Loader -->
-<div id="loader" style="display:none" class="text-center mt-3">
+<div id="loader"
+style="display:none"
+class="text-center mt-3">
 
 <div class="spinner-border text-primary"></div>
 <p class="mt-2">Updating photo please wait...</p>
 
 </div>
 
+
 <div class="mt-3 text-center">
-<div id="resultMessage" class="alert" style="display:none"></div>
+<div id="resultMessage"
+class="alert"
+style="display:none"></div>
 </div>
 
 </div>
 
 
-<!-- RIGHT SIDE CAMERA -->
+<!-- CAMERA SIDE -->
 <div class="col-md-6">
 
 <div class="camera-container">
 
-<video id="camera-feed" autoplay playsinline></video>
-
-<div class="camera-overlay"></div>
+<video id="camera-feed"
+autoplay
+playsinline></video>
 
 <div class="face-guide"></div>
 
-<canvas id="photo-canvas" style="display:none"></canvas>
+<canvas id="photo-canvas"
+style="display:none"></canvas>
 
 </div>
 
-<div id="cameraStatus" class="mt-2 text-center">
+
+<div id="cameraStatus"
+class="mt-2 text-center">
 
 <span class="badge bg-warning">
-<i class="fas fa-spinner fa-spin"></i> Initializing camera...
+<i class="fas fa-spinner fa-spin"></i>
+Initializing camera...
 </span>
 
 </div>
+
 
 <div class="mt-3 text-center">
 
@@ -100,10 +117,12 @@ style="display:none;width:200px;border-radius:10px">
 </div>
 
 </div>
+
 </div>
 
 </div>
 </div>
+
 
 
 <script>
@@ -117,31 +136,54 @@ const resultMessage = document.getElementById("resultMessage");
 const loader = document.getElementById("loader");
 const cameraStatus = document.getElementById("cameraStatus");
 
+let stream=null;
 
-// Start Camera
-navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
+
+/* START CAMERA */
+
+async function startCamera(){
+
+try{
+
+stream = await navigator.mediaDevices.getUserMedia({
+video:true
+});
 
 video.srcObject = stream;
+
+video.onloadedmetadata = () => {
 
 cameraStatus.innerHTML = `
 <span class="badge bg-success">
 <i class="fas fa-check"></i> Camera Ready
 </span>`;
 
-})
-.catch(err=>{
+};
+
+}catch(err){
 
 cameraStatus.innerHTML = `
 <span class="badge bg-danger">
 Camera Error
 </span>`;
 
-});
+}
+
+}
+
+startCamera();
 
 
-// Capture Photo
+/* CAPTURE PHOTO */
+
 captureBtn.onclick = () => {
+
+if(!video.videoWidth){
+
+alert("Camera not ready");
+return;
+
+}
 
 const ctx = canvas.getContext("2d");
 
@@ -155,12 +197,14 @@ const img = canvas.toDataURL("image/jpeg");
 preview.src = img;
 preview.style.display="block";
 
-updateBtn.disabled = false;
+updateBtn.disabled=false;
 
 };
 
 
-// Update Employee Photo
+
+/* UPDATE PHOTO */
+
 updateBtn.onclick = () => {
 
 const emp_code = document.getElementById("emp_code").value;
@@ -172,10 +216,18 @@ return;
 
 }
 
+if(!preview.src){
+
+alert("Please capture photo first");
+return;
+
+}
+
 const photo_data = preview.src;
 
 loader.style.display="block";
 resultMessage.style.display="none";
+
 
 fetch(apiUrl("/update-employee"),{
 
@@ -191,7 +243,9 @@ photo_data:photo_data
 })
 
 })
+
 .then(res=>res.json())
+
 .then(data=>{
 
 loader.style.display="none";
@@ -212,17 +266,32 @@ resultMessage.innerHTML=data.message;
 }
 
 })
+
 .catch(err=>{
 
 loader.style.display="none";
 
 resultMessage.style.display="block";
+
 resultMessage.className="alert alert-danger";
+
 resultMessage.innerHTML="Server Error";
 
 });
 
 };
+
+
+
+/* STOP CAMERA ON PAGE EXIT */
+
+window.addEventListener("beforeunload",function(){
+
+if(stream){
+stream.getTracks().forEach(track=>track.stop());
+}
+
+});
 
 </script>
 
