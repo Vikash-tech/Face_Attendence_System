@@ -8,9 +8,15 @@
 
 {% block content %}
 <!-- Summary Cards -->
+<<<<<<< HEAD
 <div class="row">
     <div class="col-md-4 dashboard-title"> 
         <h1 class="text-black mb-4">
+=======
+<div class="row mb-4">
+    <div class="col-md-4" style="margin-top: 10px;"> 
+         <h1 class="text-black mb-4">
+>>>>>>> c797a8adea6ee88c2d7952831167843805badc0a
             <i class="fas fa-chart-line"></i> Dashboard
         </h1>
     </div>
@@ -221,9 +227,8 @@ $(document).ready(function () {
     $('#servicesTable').DataTable({
         scrollY: "400px", 
         pageLength: 20 ,     // height of scroll
-        paging: false    ,
-        responsive: false ,
-        info: false      // enable pagination
+        paging: true    ,
+        responsive: false         // enable pagination
     });
 });
 </script>
