@@ -26,7 +26,7 @@ def load_api_base_url():
     except Exception:
         pass
 
-    return "https://difficulties-ads-involve-commodity.trycloudflare.com"
+    return "https://affecting-utils-crm-actions.trycloudflare.com"
 
 
 API_BASE_URL = load_api_base_url()
