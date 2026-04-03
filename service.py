@@ -98,47 +98,38 @@ def update_page(emp_code=None):
 
 @app.route("/essl-report")
 def esslreport():
-    params = {
-        "from_date": request.args.get("from_date"),
-        "to_date": request.args.get("to_date"),
-        "employee_id": request.args.get("employee_id"),
-    }
+    try:
+        params = {
+            "from_date": request.args.get("from_date") or "",
+            "to_date": request.args.get("to_date") or "",
+            "employee_id": request.args.get("employee_id") or "",
+        }
 
-    payload, err = fetch_api_json("/api/essl-export-report", params=params)
+        payload, err = fetch_api_json("/api/essl-export-report", params=params)
 
-    if payload and payload.get("status") == "success":
-        records = payload.get("data", [])
-
-        for rec in records:
-            # Convert date string → datetime
-            dt = rec.get("attendance_date")
-            if dt:
-                try:
-                    rec["attendance_date"] = datetime.strptime(dt, "%a, %d %b %Y %H:%M:%S GMT")
-                except Exception:
-                    rec["attendance_date"] = None
+        if payload and payload.get("status") == "success":
+            data = payload.get("data", [])
+        else:
+            data = []
 
         return render_template(
             "esslreport.html",
-            data=records,
+            data=data,
             from_date=params["from_date"],
             to_date=params["to_date"],
             selected_employee=params["employee_id"],
-            api_unavailable=False,
-            api_error=""
+            api_error=err if err else ""
         )
 
-    return render_template(
-        "esslreport.html",
-        data=[],
-        from_date=params["from_date"],
-        to_date=params["to_date"],
-        selected_employee=params["employee_id"],
-        api_unavailable=True,
-        api_error=err or "Unable to connect to API",
-    )
-
-
+    except Exception as e:
+        return render_template(
+            "esslreport.html",
+            data=[],
+            from_date=request.args.get("from_date") or "",
+            to_date=request.args.get("to_date") or "",
+            selected_employee=request.args.get("employee_id") or "",
+            api_error=str(e)
+        )
 
 @app.route("/report")    
 def report():
