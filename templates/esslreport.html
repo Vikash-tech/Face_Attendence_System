@@ -26,7 +26,8 @@
 
 <div class="card-body">
 
-<form method="GET" action="/report" class="row g-3">
+<!-- ✅ Form -->
+<form method="GET" action="/essl-report" class="row g-3">
 
 <div class="col-md-3">
 <label>From Date</label>
@@ -46,31 +47,21 @@ id="to_date"
 value="{{ to_date or '' }}">
 </div>
 
+<!-- ✅ TEXTBOX INSTEAD OF DROPDOWN -->
 <div class="col-md-3">
-<label>Employee</label>
-
-<select class="form-control"
+<label>Employee ID</label>
+<input type="number"
+class="form-control"
 name="employee_id"
-id="employee_id">
-
-<option value="">All Employees</option>
-
-{% for emp in employees %}
-<option value="{{ emp.id }}"
-{% if selected_employee == emp.id|string %}selected{% endif %}>
-{{ emp.emp_code }} - {{ emp.name }}
-</option>
-{% endfor %}
-
-</select>
+id="employee_id"
+placeholder="Enter Employee ID"
+value="{{ selected_employee or '' }}">
 </div>
 
 <div class="col-md-3 d-flex align-items-end">
-
 <button class="btn btn-primary w-100">
 <i class="fa fa-search"></i> Apply Filters
 </button>
-
 </div>
 
 </form>
@@ -93,64 +84,56 @@ id="employee_id">
 id="esslattendanceTable">
 
 <thead class="table-light">
-
 <tr>
-
-<th>User ID</th>
-<th>User Name</th>
+<th>Employee ID</th>
+<th>Employee Name</th>
 <th>Date</th>
-<th>In Time</th>
-<th>Out Time</th>
 <th>Total Hours</th>
-<th>Present</th>
-<th>OT</th>
-
+<th>Present Hours</th>
+<th>Overtime</th>
+<th>Absent Hours</th>
+<th>Status</th>
+<th>Punch Status</th>
+<th>No Out Punch</th>
 </tr>
-
 </thead>
 
 <tbody>
 
 {% for record in data %}
-
 <tr>
 
-<td>{{ record.user_id }}</td>
+<td>{{ record.employee_id }}</td>
 
-<td>{{ record.user_name }}</td>
-
-<td>
-{% if record.date %}
-{{ record.date.strftime('%Y-%m-%d') }}
-{% else %}
--
-{% endif %}
-</td>
+<td>{{ record.employee_name }}</td>
 
 <td>
-{% if record.in_time %}
-{{ record.in_time.strftime('%H:%M:%S') }}
-{% else %}
--
-{% endif %}
-</td>
-
-<td>
-{% if record.out_time %}
-{{ record.out_time.strftime('%H:%M:%S') }}
+{% if record.attendance_date %}
+{{ record.attendance_date }}
 {% else %}
 -
 {% endif %}
 </td>
 
 <td>{{ record.total_hours }}</td>
+<td>{{ record.present_hours }}</td>
+<td>{{ record.overtime_hours }}</td>
+<td>{{ record.absent_hours }}</td>
 
-<td>{{ record.present }}</td>
+<td>
+<span class="
+{% if record.attendance_status == 'P' %}text-success
+{% elif record.attendance_status == 'A' %}text-danger
+{% else %}text-warning{% endif %}
+">
+{{ record.attendance_status }}
+</span>
+</td>
 
-<td>{{ record.ot }}</td>
+<td>{{ record.punch_status }}</td>
+<td>{{ record.no_out_punch }}</td>
 
 </tr>
-
 {% endfor %}
 
 </tbody>
@@ -166,33 +149,25 @@ id="esslattendanceTable">
 </div>
 
 <script>
-
 $(document).ready(function () {
-
-$('#esslattendanceTable').DataTable({
-
-scrollY: "400px",
-pageLength: 20,
-paging: true,
-responsive: true,
-info: true,
-order: [[2, "desc"]]
-
-});
-
+    $('#esslattendanceTable').DataTable({
+        scrollY: "400px",
+        pageLength: 20,
+        paging: true,
+        responsive: true,
+        info: true,
+        order: [[2, "desc"]]
+    });
 });
 
 function exportReport(){
+    const from_date = document.getElementById("from_date").value;
+    const to_date = document.getElementById("to_date").value;
+    const employee_id = document.getElementById("employee_id").value;
 
-const from_date = document.getElementById("from_date").value;
-const to_date = document.getElementById("to_date").value;
-const employee_id = document.getElementById("employee_id").value;
-
-window.location.href =
-apiUrl(`/api/essl-export-report?from_date=${from_date}&to_date=${to_date}&employee_id=${employee_id}`);
-
+    window.location.href =
+    `/api/essl-export-report?from_date=${from_date}&to_date=${to_date}&employee_id=${employee_id}`;
 }
-
 </script>
 
 {% endblock %}
