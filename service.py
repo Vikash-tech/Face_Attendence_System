@@ -103,38 +103,41 @@ def esslreport():
         "to_date": request.args.get("to_date"),
         "employee_id": request.args.get("employee_id"),
     }
-    payload, err = fetch_api_json("/report-data", params=params)
-    if payload and payload.get("success"):
+
+    payload, err = fetch_api_json("/api/essl-export-report", params=params)
+
+    if payload and payload.get("status") == "success":
         records = payload.get("data", [])
+
         for rec in records:
-            ts = rec.get("timestamp")
-            if ts:
+            # Convert date string → datetime
+            dt = rec.get("attendance_date")
+            if dt:
                 try:
-                    rec["timestamp"] = datetime.fromisoformat(ts)
+                    rec["attendance_date"] = datetime.strptime(dt, "%a, %d %b %Y %H:%M:%S GMT")
                 except Exception:
-                    rec["timestamp"] = None
+                    rec["attendance_date"] = None
+
         return render_template(
             "esslreport.html",
             data=records,
-            employees=payload.get("employees", []),
-            total_minutes=payload.get("total_minutes", 0),
-            from_date=payload.get("from_date"),
-            to_date=payload.get("to_date"),
-            selected_employee=payload.get("selected_employee", ""),
+            from_date=params["from_date"],
+            to_date=params["to_date"],
+            selected_employee=params["employee_id"],
             api_unavailable=False,
-            api_error="",
+            api_error=""
         )
+
     return render_template(
         "esslreport.html",
         data=[],
-        employees=[],
-        total_minutes=0,
-        from_date=request.args.get("from_date"),
-        to_date=request.args.get("to_date"),
-        selected_employee=request.args.get("employee_id", ""),
+        from_date=params["from_date"],
+        to_date=params["to_date"],
+        selected_employee=params["employee_id"],
         api_unavailable=True,
         api_error=err or "Unable to connect to API",
     )
+
 
 
 @app.route("/report")    
