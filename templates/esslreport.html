@@ -47,7 +47,7 @@ id="to_date"
 value="{{ to_date or '' }}">
 </div>
 
-<!-- ✅ TEXTBOX INSTEAD OF DROPDOWN -->
+
 <div class="col-md-3">
 <label>Employee ID</label>
 <input type="number"
@@ -156,7 +156,17 @@ $(document).ready(function () {
         paging: true,
         responsive: true,
         info: true,
-        order: [[2, "desc"]]
+        order: [[2, "desc"]],
+
+        dom: 'Bfrtip',
+    
+        buttons: [
+            {
+                extend: 'excelHtml5',
+                text: 'Export Excel',
+                title: 'ESSL_Report'
+            }
+        ]
     });
 });
 
