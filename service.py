@@ -26,7 +26,7 @@ def load_api_base_url():
     except Exception:
         pass
 
-    return "https://appliance-incoming-carroll-coating.trycloudflare.com"
+    return "https://comprehensive-explaining-vessels-uploaded.trycloudflare.com"
 
 
 API_BASE_URL = load_api_base_url()
