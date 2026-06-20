@@ -26,7 +26,7 @@ def load_api_base_url():
     except Exception:
         pass
 
-    return "https://comprehensive-explaining-vessels-uploaded.trycloudflare.com"
+    return "https://arguments-frank-including-paperback.trycloudflare.com"
 
 
 API_BASE_URL = load_api_base_url()
